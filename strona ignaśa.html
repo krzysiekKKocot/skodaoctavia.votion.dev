@@ -1,0 +1,1068 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skoda Octavia - Serwer Minecraft & Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-main: #0b0d14;
+      --bg-card: #121624;
+      --bg-input: #0a0c12;
+      --accent-gold: #f59e0b;
+      --accent-gold-hover: #d97706;
+      --accent-green: #10b981;
+      --accent-purple: #6366f1;
+      --accent-purple-hover: #4f46e5;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --border-color: #1f293d;
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    canvas#particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* BAR ZMIANY WIDOKU (DEMO) */
+    .view-switcher {
+      background: #181c2b;
+      border-bottom: 1px solid var(--border-color);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .view-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active, .view-btn:hover {
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 700;
+      border-color: var(--accent-gold);
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      color: var(--accent-gold);
+      text-decoration: none;
+    }
+
+    .logo span.badge {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    nav a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--accent-gold);
+    }
+
+    .btn-outline-gold {
+      border: 2px solid var(--accent-gold);
+      color: var(--accent-gold);
+      background: transparent;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-outline-gold:hover {
+      background: var(--accent-gold);
+      color: #000;
+    }
+
+    /* SEKCJA MAIN LANDING */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+
+    .hero h1 span {
+      color: var(--accent-gold);
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 18px;
+      margin-bottom: 36px;
+    }
+
+    .ip-boxes {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .ip-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-width: 300px;
+    }
+
+    .ip-info {
+      text-align: left;
+    }
+
+    .ip-info .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .ip-info .val {
+      font-weight: 700;
+      color: var(--accent-gold);
+      font-size: 16px;
+    }
+
+    .btn-copy {
+      background: #1e2638;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-copy:hover {
+      background: var(--accent-gold);
+      color: #000;
+    }
+
+    .btn-discord {
+      background: var(--accent-purple);
+      color: #fff;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .btn-discord:hover {
+      background: var(--accent-purple-hover);
+    }
+
+    /* OGŁOSZENIE */
+    .announcement-box {
+      max-width: 900px;
+      margin: 20px auto 60px;
+      background: var(--bg-card);
+      border: 2px solid var(--accent-green);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .announcement-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent-green);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .announcement-body {
+      color: #d1d5db;
+      font-size: 15px;
+    }
+
+    /* JAK DOŁĄCZYĆ */
+    .section-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .section-subtitle-underline {
+      width: 50px;
+      height: 4px;
+      background: var(--accent-gold);
+      margin: 0 auto 40px;
+      border-radius: 2px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 30px 24px;
+      position: relative;
+    }
+
+    .step-num {
+      background: var(--accent-gold);
+      color: #000;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .step-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .step-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* KONTAKT */
+    .contact-card {
+      max-width: 900px;
+      margin: 0 auto 80px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-gold);
+      border-radius: 14px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .contact-card p {
+      color: #d1d5db;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      padding: 30px;
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: auto;
+    }
+
+    /* LOGOWANIE / PANEL */
+    .auth-container, .admin-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+      width: 100%;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      background: var(--bg-card);
+      padding: 16px 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .admin-user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-role {
+      background: #7f1d1d;
+      color: #fca5a5;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge-role.gold {
+      background: #78350f;
+      color: #fde047;
+    }
+
+    .badge-role.green {
+      background: #064e3b;
+      color: #6ee7b7;
+    }
+
+    .admin-nav-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-gold);
+      color: #000;
+      border-color: var(--accent-gold);
+    }
+
+    .panel-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .char-count {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 12px;
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+    }
+
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .btn-reset-link {
+      background: none;
+      border: none;
+      color: var(--accent-gold);
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 6px;
+      display: inline-block;
+      text-decoration: underline;
+    }
+
+    .panel-actions-bar {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-gold {
+      background: var(--accent-gold);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-gold:hover {
+      background: var(--accent-gold-hover);
+    }
+
+    .btn-green {
+      background: var(--accent-green);
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-dark {
+      background: #1f293d;
+      color: #fff;
+      border: 1px solid var(--border-color);
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-red {
+      background: #7f1d1d;
+      color: #fca5a5;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* LOGS LIST */
+    .logs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .log-item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 13px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .log-time {
+      color: var(--text-muted);
+      min-width: 140px;
+    }
+
+    .log-user {
+      color: var(--accent-gold);
+      min-width: 200px;
+    }
+
+    .log-action {
+      color: #d1d5db;
+    }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent-green);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 9999;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles"></canvas>
+
+  <div class="app-container">
+
+    <!-- DEMO VIEW SWITCHER BAR -->
+    <div class="view-switcher">
+      <button class="view-btn active" onclick="switchView('landing')">🌐 Strona Główna</button>
+      <button class="view-btn" onclick="switchView('login')">🔑 Logowanie / Rejestracja</button>
+      <button class="view-btn" onclick="switchView('admin')">⚙️ Panel Admina</button>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+      <a href="#" class="logo" onclick="switchView('landing')">
+        Skoda Octavia <span class="badge">Minecraft</span>
+      </a>
+      <nav>
+        <a href="#dołącz">Jak dołączyć?</a>
+        <a href="#rangi">Rangi</a>
+        <a href="#kontakt">Kontakt</a>
+        <button class="btn-outline-gold" onclick="switchView('login')">Zaloguj</button>
+      </nav>
+    </header>
+
+    <!-- WIDOK 1: LANDING PAGE -->
+    <div id="view-landing">
+      <section class="hero">
+        <h1 id="hero-title-val">Skoda Octavia: Twoje nowe miejsce w <span>Minecraft!</span></h1>
+        <p id="hero-subtitle-val">Razem budujemy wspaniałą społeczność graczy!</p>
+
+        <div class="ip-boxes">
+          <div class="ip-box">
+            <div class="ip-info">
+              <span class="label" id="s1-label">IP Serwera(box pvp)</span>
+              <span class="val" id="s1-val">skodaoctavia.votion.dev</span>
+            </div>
+            <button class="btn-copy" onclick="copyIP('skodaoctavia.votion.dev')">📋 Kopiuj</button>
+          </div>
+          <div class="ip-box">
+            <div class="ip-info">
+              <span class="label" id="s2-label">IP Serwera 2 (gencash)</span>
+              <span class="val" id="s2-val">gencash.skodaoctavia.dev</span>
+            </div>
+            <button class="btn-copy" onclick="copyIP('gencash.skodaoctavia.dev')">📋 Kopiuj</button>
+          </div>
+        </div>
+
+        <a href="https://discord.gg/TMyN5GeGd" target="_blank" class="btn-discord">
+          Dołącz do Discorda
+        </a>
+      </section>
+
+      <!-- OGŁOSZENIE -->
+      <div class="announcement-box" id="announcement-box">
+        <div class="announcement-header">
+          📣 <span id="ann-title-val">Ogłoszenie</span>
+        </div>
+        <div class="announcement-body" id="ann-body-val">
+          zaraz morze załoncze server
+        </div>
+      </div>
+
+      <!-- JAK DOŁĄCZYĆ -->
+      <section id="dołącz" style="padding: 40px 0;">
+        <h2 class="section-title">Jak dołączyć?</h2>
+        <div class="section-subtitle-underline"></div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h3 id="step1-title-val">Skopiuj adres</h3>
+            <p id="step1-desc-val">Kliknij jeden z adresów serwera na górze strony – skopiuje się sam.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h3 id="step2-title-val">Dodaj serwer</h3>
+            <p id="step2-desc-val">W Minecraft wybierz „Tryb wieloosobowy” → „Dodaj serwer” i wklej adres.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <h3 id="step3-title-val">Graj i poznaj ekipę</h3>
+            <p id="step3-desc-val">Wejdź na serwer i dołącz do naszego Discorda, żeby być na bieżąco z wydarzeniami.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- KONTAKT -->
+      <section id="kontakt">
+        <h2 class="section-title">Kontakt</h2>
+        <div class="section-subtitle-underline"></div>
+        <div class="contact-card">
+          <p id="contact-text-val">Masz pytanie, pomysł na event albo chcesz zgłosić problem? Napisz do nas na Discordzie – tam odpowiadamy najszybciej.</p>
+          <a href="https://discord.gg/TMyN5GeGd" target="_blank" class="btn-discord">Napisz na Discordzie</a>
+        </div>
+      </section>
+
+      <footer>
+        <span id="footer-text-val">© 2026 Skoda Octavia. Wszystkie prawa zastrzeżone.</span>
+      </footer>
+    </div>
+
+    <!-- WIDOK 2: LOGOWANIE -->
+    <div id="view-login" class="hidden">
+      <div class="auth-container">
+        <div class="panel-box" style="max-width: 450px; margin: 60px auto;">
+          <h2 style="text-align: center; margin-bottom: 24px; font-size: 24px;">Zaloguj się do panelu</h2>
+          <form onsubmit="handleLogin(event)">
+            <div class="form-group">
+              <label>E-mail / Login</label>
+              <input type="email" class="form-control" value="krzysztof.kocot@czyzowka.edu.pl" required>
+            </div>
+            <div class="form-group">
+              <label>Hasło</label>
+              <input type="password" class="form-control" value="••••••••••••" required>
+            </div>
+            <button type="submit" class="btn-gold" style="width: 100%; justify-content: center;">Zaloguj się</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIDOK 3: PANEL ADMINA -->
+    <div id="view-admin" class="hidden">
+      <div class="admin-container">
+        <!-- HEADER PANELU -->
+        <div class="admin-header">
+          <div style="font-family: var(--font-pixel); color: var(--accent-gold); font-size: 16px;">
+            Skoda Octavia <span style="font-family: var(--font-sans); color: var(--text-muted); font-size: 12px;">panel</span>
+          </div>
+          <div class="admin-user-info">
+            <span style="font-weight: 700;">Krzysiek</span>
+            <span class="badge-role">Właściciel</span>
+            <span class="badge-role gold">opiekun</span>
+            <button class="btn-dark" style="padding: 6px 12px; font-size: 12px;" onclick="showToast('Okno zmiany hasła')">Zmień hasło</button>
+            <button class="btn-red" style="font-size: 12px;" onclick="switchView('landing')">Wyloguj</button>
+          </div>
+        </div>
+
+        <!-- ZAKŁADKI -->
+        <div class="admin-nav-tabs">
+          <button class="tab-btn active" onclick="switchAdminTab('teksty', this)">📜 Teksty strony</button>
+          <button class="tab-btn" onclick="switchAdminTab('wizytowka', this)">😃 Moja wizytówka</button>
+          <button class="tab-btn" onclick="switchAdminTab('konta', this)">👥 Konta i rangi</button>
+          <button class="tab-btn" onclick="switchAdminTab('dziennik', this)">📜 Dziennik zmian</button>
+        </div>
+
+        <!-- TAB 1: TEKSTY STRONY -->
+        <div id="tab-teksty" class="panel-box">
+          <h2 style="margin-bottom: 8px;">Teksty strony</h2>
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Zmieniasz tylko napisy – wygląd strony zostaje. Najpierw kliknij <b>Podgląd</b>, potem <b>Zapisz</b>.</p>
+
+          <form id="texts-form">
+            <!-- Nagłówek -->
+            <div class="form-group">
+              <label>Nagłówek strony <span class="char-count"><span id="c1">0</span>/80</span></label>
+              <input type="text" class="form-control" id="inp-hero-title" value="Skoda Octavia: Twoje nowe miejsce w Minecraft!" maxlength="80" oninput="updateCount(this, 'c1')">
+              <button type="button" class="btn-reset-link" onclick="resetField('inp-hero-title', 'Skoda Octavia: Twoje nowe miejsce w Minecraft!', 'c1')">przywróć domyślny</button>
+            </div>
+
+            <!-- Podtytuł -->
+            <div class="form-group">
+              <label>Podtytuł <span class="char-count"><span id="c2">0</span>/160</span></label>
+              <input type="text" class="form-control" id="inp-hero-subtitle" value="Razem budujemy wspaniałą społeczność graczy!" maxlength="160" oninput="updateCount(this, 'c2')">
+              <button type="button" class="btn-reset-link" onclick="resetField('inp-hero-subtitle', 'Razem budujemy wspaniałą społeczność graczy!', 'c2')">przywróć domyślny</button>
+            </div>
+
+            <!-- Ogłoszenie Tytuł -->
+            <div class="form-group">
+              <label>Ogłoszenie – tytuł <span class="char-count"><span id="c3">0</span>/80</span></label>
+              <input type="text" class="form-control" id="inp-ann-title" value="📣 Ogłoszenie" maxlength="80" oninput="updateCount(this, 'c3')">
+              <button type="button" class="btn-reset-link" onclick="resetField('inp-ann-title', '📣 Ogłoszenie', 'c3')">przywróć domyślny</button>
+            </div>
+
+            <!-- Ogłoszenie Treść -->
+            <div class="form-group">
+              <label>Ogłoszenie – treść (puste = ogłoszenie ukryte) <span class="char-count"><span id="c4">0</span>/1000</span></label>
+              <textarea class="form-control" id="inp-ann-body" maxlength="1000" oninput="updateCount(this, 'c4')">zaraz morze załoncze server</textarea>
+              <button type="button" class="btn-reset-link" onclick="resetField('inp-ann-body', 'zaraz morze załoncze server', 'c4')">przywróć domyślny</button>
+            </div>
+
+            <!-- Kontakt -->
+            <div class="form-group">
+              <label>Kontakt – tekst <span class="char-count"><span id="c5">0</span>/300</span></label>
+              <textarea class="form-control" id="inp-contact-text" maxlength="300" oninput="updateCount(this, 'c5')">Masz pytanie, pomysł na event albo chcesz zgłosić problem? Napisz do nas na Discordzie – tam odpowiadamy najszybciej.</textarea>
+              <button type="button" class="btn-reset-link" onclick="resetField('inp-contact-text', 'Masz pytanie, pomysł na event albo chcesz zgłosić problem? Napisz do nas na Discordzie – tam odpowiadamy najszybciej.', 'c5')">przywróć domyślny</button>
+            </div>
+
+            <!-- Stopka -->
+            <div class="form-group">
+              <label>Stopka <span class="char-count"><span id="c6">0</span>/100</span></label>
+              <input type="text" class="form-control" id="inp-footer-text" value="© 2026 Skoda Octavia. Wszystkie prawa zastrzeżone." maxlength="100" oninput="updateCount(this, 'c6')">
+              <button type="button" class="btn-reset-link" onclick="resetField('inp-footer-text', '© 2026 Skoda Octavia. Wszystkie prawa zastrzeżone.', 'c6')">przywróć domyślny</button>
+            </div>
+
+            <div class="panel-actions-bar">
+              <button type="button" class="btn-dark" onclick="switchView('landing')">👁 Podgląd</button>
+              <button type="button" class="btn-green" onclick="saveTexts()">💾 Zapisz na stronie</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- TAB 2: MOJA WIZYTÓWKA -->
+        <div id="tab-wizytowka" class="panel-box hidden">
+          <h2 style="margin-bottom: 20px;">Moja wizytówka w sekcji „Nasz Zespół”</h2>
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label>Nick (widoczny na stronie)</label>
+              <input type="text" class="form-control" value="Krzysiek">
+            </div>
+            <div class="form-group">
+              <label>Ikonka</label>
+              <select class="form-control">
+                <option>👑</option>
+                <option>⚔️</option>
+                <option>🛡️</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Opis pod nickiem</label>
+            <input type="text" class="form-control" value="Właściciel & Opiekun Skoda Octavia">
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 10px; font-weight: 400;">
+              <input type="checkbox" checked> Pokazuj mnie w sekcji „Nasz Zespół”
+            </label>
+            <span style="font-size: 12px; color: var(--text-muted);">Na stronie widać tylko nick, ikonkę i opis. Nigdy e-maila.</span>
+          </div>
+          <button class="btn-gold" onclick="showToast('Wizytówka została zapisana!')">Zapisz wizytówkę</button>
+        </div>
+
+        <!-- TAB 3: KONTA I RANGI -->
+        <div id="tab-konta" class="panel-box hidden">
+          <h2 style="margin-bottom: 8px;">Konta i rangi</h2>
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Możesz zakładać konta i zmieniać rangi Adminów i Graczy. Jesteś głównym Opiekunem i Właścicielem projektu.</p>
+
+          <h3 style="color: var(--accent-gold); font-size: 16px; margin-bottom: 16px;">+ Nowe konto</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; margin-bottom: 30px;">
+            <input type="text" class="form-control" placeholder="Nick">
+            <input type="email" class="form-control" placeholder="E-mail (login)">
+            <select class="form-control">
+              <option>Administrator</option>
+              <option>Gracz</option>
+            </select>
+            <button class="btn-gold" onclick="showToast('Utworzono nowe konto!')">Utwórz konto</button>
+          </div>
+
+          <h3 style="font-size: 18px; margin-bottom: 16px;">Wszystkie konta</h3>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="background: var(--bg-input); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <span style="font-weight: 700;">👑 Krzysiek</span>
+                <span class="badge-role">Właściciel</span>
+                <span class="badge-role gold">opiekun</span>
+                <span style="font-size: 12px; color: var(--text-muted);">(to Ty)</span>
+              </div>
+              <p style="font-size: 12px; color: var(--text-muted);">krzysztof.kocot@czyzowka.edu.pl</p>
+              <p style="font-size: 12px; color: var(--accent-gold); margin-top: 6px;">Swoją wizytówkę zmieniasz w zakładce „Moja wizytówka”.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: DZIENNIK ZMIAN -->
+        <div id="tab-dziennik" class="panel-box hidden">
+          <h2 style="margin-bottom: 8px;">Dziennik zmian</h2>
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Ostatnie 50 zdarzeń: kto się logował i co zmienił.</p>
+
+          <div class="logs-list" id="logs-container">
+            <div class="log-item">
+              <span class="log-time">25.09.2026, 18:00</span>
+              <span class="log-user">krzysztof.kocot@czyzowka.edu.pl</span>
+              <span class="log-action">Aktualizacja uprawnień konta: nadano rolę Opiekuna</span>
+            </div>
+            <div class="log-item">
+              <span class="log-time">25.09.2026, 17:28</span>
+              <span class="log-user">krzysztof.kocot@czyzowka.edu.pl</span>
+              <span class="log-action">Usunięcie konta Pan Razowski</span>
+            </div>
+            <div class="log-item">
+              <span class="log-time">25.09.2026, 17:27</span>
+              <span class="log-user">krzysztof.kocot@czyzowka.edu.pl</span>
+              <span class="log-action">Zmiana tekstów strony (23 pól)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast">Gotowe! Zmiany zostały zapisane.</div>
+
+  </div>
+
+  <script>
+    // PRZEŁĄCZANIE WIDOKÓW
+    function switchView(viewName) {
+      document.getElementById('view-landing').classList.add('hidden');
+      document.getElementById('view-login').classList.add('hidden');
+      document.getElementById('view-admin').classList.add('hidden');
+
+      document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (viewName === 'landing') {
+        document.getElementById('view-landing').classList.remove('hidden');
+        document.querySelectorAll('.view-btn')[0].classList.add('active');
+      } else if (viewName === 'login') {
+        document.getElementById('view-login').classList.remove('hidden');
+        document.querySelectorAll('.view-btn')[1].classList.add('active');
+      } else if (viewName === 'admin') {
+        document.getElementById('view-admin').classList.remove('hidden');
+        document.querySelectorAll('.view-btn')[2].classList.add('active');
+      }
+    }
+
+    // PRZEŁĄCZANIE ZAKŁADEK W PANELU
+    function switchAdminTab(tabName, btnElement) {
+      document.getElementById('tab-teksty').classList.add('hidden');
+      document.getElementById('tab-wizytowka').classList.add('hidden');
+      document.getElementById('tab-konta').classList.add('hidden');
+      document.getElementById('tab-dziennik').classList.add('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      btnElement.classList.add('active');
+
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+    }
+
+    // KOPIOWANIE IP
+    function copyIP(text) {
+      navigator.clipboard.writeText(text);
+      showToast('Skopiowano IP: ' + text);
+    }
+
+    // TOAST NOTIFICATION
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // LICZNIKI ZNAKÓW
+    function updateCount(input, elId) {
+      document.getElementById(elId).innerText = input.value.length;
+    }
+
+    function initCounts() {
+      const mappings = [
+        ['inp-hero-title', 'c1'],
+        ['inp-hero-subtitle', 'c2'],
+        ['inp-ann-title', 'c3'],
+        ['inp-ann-body', 'c4'],
+        ['inp-contact-text', 'c5'],
+        ['inp-footer-text', 'c6']
+      ];
+      mappings.forEach(([inpId, cId]) => {
+        const el = document.getElementById(inpId);
+        if (el) updateCount(el, cId);
+      });
+    }
+
+    function resetField(inpId, defaultVal, cId) {
+      const el = document.getElementById(inpId);
+      if (el) {
+        el.value = defaultVal;
+        updateCount(el, cId);
+      }
+    }
+
+    // ZAPISYWANIE TEKSTÓW Z PANELU NA STRONĘ GŁÓWNĄ
+    function saveTexts() {
+      document.getElementById('hero-title-val').innerHTML = document.getElementById('inp-hero-title').value.replace('Minecraft!', '<span>Minecraft!</span>');
+      document.getElementById('hero-subtitle-val').innerText = document.getElementById('inp-hero-subtitle').value;
+      document.getElementById('ann-title-val').innerText = document.getElementById('inp-ann-title').value;
+      
+      const annBody = document.getElementById('inp-ann-body').value;
+      const annBox = document.getElementById('announcement-box');
+      if (!annBody.trim()) {
+        annBox.style.display = 'none';
+      } else {
+        annBox.style.display = 'block';
+        document.getElementById('ann-body-val').innerText = annBody;
+      }
+
+      document.getElementById('contact-text-val').innerText = document.getElementById('inp-contact-text').value;
+      document.getElementById('footer-text-val').innerText = document.getElementById('inp-footer-text').value;
+
+      addLog('Zmiana tekstów strony');
+      showToast('Teksty zostały pomyślnie zapisane!');
+    }
+
+    function addLog(action) {
+      const container = document.getElementById('logs-container');
+      const now = new Date();
+      const timeStr = now.toLocaleDateString() + ', ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      
+      const item = document.createElement('div');
+      item.className = 'log-item';
+      item.innerHTML = `
+        <span class="log-time">${timeStr}</span>
+        <span class="log-user">krzysztof.kocot@czyzowka.edu.pl</span>
+        <span class="log-action">${action}</span>
+      `;
+      container.prepend(item);
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      addLog('Zalogowanie do panelu');
+      switchView('admin');
+      showToast('Zalogowano pomyślnie!');
+    }
+
+    // ANIMACJA PIKSELI W CANVAS
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 4 + 2,
+        speedY: -Math.random() * 0.5 - 0.2,
+        opacity: Math.random() * 0.5 + 0.2
+      });
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#f59e0b';
+
+      particles.forEach(p => {
+        ctx.globalAlpha = p.opacity;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        p.y += p.speedY;
+        if (p.y < -10) {
+          p.y = canvas.height + 10;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+
+      requestAnimationFrame(animateParticles);
+    }
+
+    animateParticles();
+    initCounts();
+  </script>
+</body>
+</html>
